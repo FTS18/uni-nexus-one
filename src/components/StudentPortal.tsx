@@ -4,6 +4,10 @@ import { Sidebar } from "./Sidebar";
 import { Dashboard } from "./Dashboard";
 import { ClubsPage } from "./ClubsPage";
 import { TimetablePage } from "./TimetablePage";
+import { CampusMapPage } from "./CampusMapPage";
+import { StudentForum } from "./StudentForum";
+import { LostFoundPage } from "./LostFoundPage";
+import { AttendancePage } from "./AttendancePage";
 import { useToast } from "@/hooks/use-toast";
 
 // Placeholder components for remaining pages
@@ -31,18 +35,6 @@ const EventsPage = () => (
   </div>
 );
 
-const AttendancePage = () => (
-  <div className="space-y-6">
-    <h1 className="font-heading text-3xl font-bold">Attendance Tracker</h1>
-    <p className="font-body text-muted-foreground">
-      View attendance data for all subjects with detailed statistics.
-    </p>
-    <div className="bg-accent/10 border border-accent/20 rounded-lg p-6 text-center">
-      <p className="font-body">📊 Attendance tracking system ready</p>
-    </div>
-  </div>
-);
-
 const AnnouncementsPage = () => (
   <div className="space-y-6">
     <h1 className="font-heading text-3xl font-bold">Announcements</h1>
@@ -51,42 +43,6 @@ const AnnouncementsPage = () => (
     </p>
     <div className="bg-accent/10 border border-accent/20 rounded-lg p-6 text-center">
       <p className="font-body">📢 Announcement system ready</p>
-    </div>
-  </div>
-);
-
-const CampusMapPage = () => (
-  <div className="space-y-6">
-    <h1 className="font-heading text-3xl font-bold">Campus Map</h1>
-    <p className="font-body text-muted-foreground">
-      Interactive campus map with markers for buildings and facilities.
-    </p>
-    <div className="bg-accent/10 border border-accent/20 rounded-lg p-6 text-center">
-      <p className="font-body">🗺️ Interactive map system ready</p>
-    </div>
-  </div>
-);
-
-const LostFoundPage = () => (
-  <div className="space-y-6">
-    <h1 className="font-heading text-3xl font-bold">Lost & Found</h1>
-    <p className="font-body text-muted-foreground">
-      Post and search for lost or found items on campus.
-    </p>
-    <div className="bg-accent/10 border border-accent/20 rounded-lg p-6 text-center">
-      <p className="font-body">🔍 Lost & Found portal ready</p>
-    </div>
-  </div>
-);
-
-const StudentForum = () => (
-  <div className="space-y-6">
-    <h1 className="font-heading text-3xl font-bold">Student Forum</h1>
-    <p className="font-body text-muted-foreground">
-      Share ideas, ask questions, and contribute articles about campus life.
-    </p>
-    <div className="bg-accent/10 border border-accent/20 rounded-lg p-6 text-center">
-      <p className="font-body">💬 Discussion forum ready</p>
     </div>
   </div>
 );
