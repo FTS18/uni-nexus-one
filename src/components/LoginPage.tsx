@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ThemeToggle } from "./ThemeToggle";
-import { GraduationCap, Lock, Mail, User } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { GraduationCap, Lock, Mail, User, X } from "lucide-react";
 
 interface LoginPageProps {
   onLogin: (email: string) => void;
@@ -31,6 +31,10 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
     }
   };
 
+  const handleGuestLogin = () => {
+    onLogin("guest@pec.edu.in");
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
       <div className="absolute top-4 right-4">
@@ -52,11 +56,20 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
         </div>
 
         {/* Login/Signup Form */}
-        <Card className="border-portal-border">
+        <Card className="border-portal-border relative">
+          <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 h-8 w-8 text-muted-foreground z-10"
+              onClick={handleGuestLogin}
+              aria-label="Close"
+          >
+              <X className="h-4 w-4" />
+          </Button>
           <CardHeader className="space-y-1">
             <CardTitle className="font-heading text-xl">Welcome Back</CardTitle>
             <CardDescription className="font-body">
-              Sign in to access your student dashboard
+              Sign in to access your student dashboar
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -173,10 +186,10 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
               </TabsContent>
             </Tabs>
             
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground font-body">
-                Ready for Firebase Authentication integration
-              </p>
+            <div className="mt-4 text-center text-sm">
+                <Button variant="link" onClick={handleGuestLogin} className="font-body text-muted-foreground">
+                    or continue as a guest
+                </Button>
             </div>
           </CardContent>
         </Card>
@@ -184,3 +197,4 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
     </div>
   );
 };
+

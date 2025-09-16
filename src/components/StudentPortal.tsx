@@ -9,6 +9,12 @@ import { StudentForum } from "./StudentForum";
 import { LostFoundPage } from "./LostFoundPage";
 import { AttendancePage } from "./AttendancePage";
 import { useToast } from "@/hooks/use-toast";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
+import { ThemeToggle } from "./ThemeToggle";
+
 
 // Placeholder components for remaining pages
 const StudyMaterials = () => (
@@ -18,7 +24,7 @@ const StudyMaterials = () => (
       Google Drive integration will be implemented here to fetch files from "pec students grp googlew drive folder".
     </p>
     <div className="bg-accent/10 border border-accent/20 rounded-lg p-6 text-center">
-      <p className="font-body">📁 Ready for Google Drive API integration</p>
+      <p className="font-body">刀 Ready for Google Drive API integration</p>
     </div>
   </div>
 );
@@ -30,7 +36,7 @@ const EventsPage = () => (
       Dynamic event listings and image gallery for college fest will be displayed here.
     </p>
     <div className="bg-accent/10 border border-accent/20 rounded-lg p-6 text-center">
-      <p className="font-body">🎉 Event management system ready</p>
+      <p className="font-body">脂 Event management system ready</p>
     </div>
   </div>
 );
@@ -42,7 +48,7 @@ const AnnouncementsPage = () => (
       Central notice board for college announcements with yellow highlighting for urgent messages.
     </p>
     <div className="bg-accent/10 border border-accent/20 rounded-lg p-6 text-center">
-      <p className="font-body">📢 Announcement system ready</p>
+      <p className="font-body">討 Announcement system ready</p>
     </div>
   </div>
 );
@@ -54,7 +60,7 @@ const FacultyDirectory = () => (
       Searchable directory of professors and staff with contact information.
     </p>
     <div className="bg-accent/10 border border-accent/20 rounded-lg p-6 text-center">
-      <p className="font-body">👥 Faculty directory ready</p>
+      <p className="font-body">則 Faculty directory ready</p>
     </div>
   </div>
 );
@@ -63,7 +69,8 @@ export const StudentPortal = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { toast } = useToast();
 
   const handleLogin = (email: string) => {
@@ -119,19 +126,77 @@ export const StudentPortal = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <Sidebar
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        onLogout={handleLogout}
-        isCollapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-      />
-      <main className="flex-1 overflow-auto">
-        <div className="container mx-auto px-6 py-8 max-w-7xl">
-          {renderContent()}
-        </div>
-      </main>
+    <div className="flex min-h-screen bg-background">
+      {/* --- DESKTOP SIDEBAR --- */}
+      <div
+          className={cn(
+              "hidden md:flex flex-col transition-all duration-300 ease-in-out",
+              isSidebarOpen ? "w-64" : "w-16"
+          )}
+      >
+          <Sidebar
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onLogout={handleLogout}
+              isCollapsed={!isSidebarOpen}
+          />
+      </div>
+
+      {/* --- MOBILE SIDEBAR (SHEET) --- */}
+      <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
+          <SheetContent side="left" className="p-0 w-72 bg-sidebar border-r-0">
+              <Sidebar
+                  activeTab={activeTab}
+                  onTabChange={(tab) => {
+                      setActiveTab(tab);
+                      setIsMobileSidebarOpen(false);
+                  }}
+                  onLogout={handleLogout}
+                  isCollapsed={false}
+              />
+          </SheetContent>
+      </Sheet>
+      
+      {/* --- MAIN CONTENT WRAPPER --- */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Header */}
+          <header className="flex items-center justify-between h-16 px-4 border-b border-portal-border shrink-0">
+              {/* Left side of header */}
+              <div className="flex items-center gap-2">
+                  <h1 className="font-heading text-xl font-bold uppercase">Pec</h1>
+              </div>
+
+              {/* Right side of header */}
+              <div className="flex items-center gap-2">
+                  {/* Desktop Toggle */}
+                  <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                      className="hidden md:inline-flex h-9 w-9"
+                  >
+                      <Menu className="h-5 w-5" />
+                  </Button>
+                  {/* Mobile Hamburger */}
+                  <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsMobileSidebarOpen(true)}
+                      className="md:hidden h-9 w-9"
+                  >
+                      <Menu className="h-5 w-5" />
+                  </Button>
+                  <ThemeToggle />
+              </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="flex-1 overflow-auto">
+              <div className="container mx-auto px-4 sm:px-6 py-8 max-w-7xl">
+                  {renderContent()}
+              </div>
+          </main>
+      </div>
     </div>
   );
 };

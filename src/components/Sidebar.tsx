@@ -10,19 +10,16 @@ import {
   Search, 
   MessageSquare, 
   UserCheck,
-  LogOut,
-  Menu
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "./ThemeToggle";
 
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   onLogout: () => void;
   isCollapsed: boolean;
-  onToggleCollapse: () => void;
 }
 
 const navigationItems = [
@@ -43,35 +40,24 @@ export const Sidebar = ({
   activeTab, 
   onTabChange, 
   onLogout, 
-  isCollapsed, 
-  onToggleCollapse 
+  isCollapsed 
 }: SidebarProps) => {
   return (
     <div className={cn(
-      "bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300",
-      isCollapsed ? "w-16" : "w-64"
+      "bg-sidebar border-r border-sidebar-border flex flex-col h-full",
     )}>
       {/* Header */}
-      <div className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center justify-between">
-          {!isCollapsed && (
-            <h2 className="font-heading text-lg font-bold text-sidebar-foreground">
-              PEC Portal
-            </h2>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleCollapse}
-            className="h-8 w-8 text-sidebar-foreground hover:bg-sidebar-accent"
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
-        </div>
+      <div className="p-4 border-b border-sidebar-border flex items-center justify-center h-16 shrink-0">
+          <h2 className={cn(
+            "font-heading text-lg font-bold text-sidebar-foreground whitespace-nowrap transition-opacity duration-200",
+            isCollapsed ? "opacity-0" : "opacity-100"
+          )}>
+            PEC Portal
+          </h2>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-2 space-y-1">
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -86,20 +72,17 @@ export const Sidebar = ({
                 isCollapsed && "justify-center px-2"
               )}
               onClick={() => onTabChange(item.id)}
+              title={isCollapsed ? item.label : undefined}
             >
-              <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-              {!isCollapsed && <span>{item.label}</span>}
+              <Icon className={cn("h-4 w-4 shrink-0", !isCollapsed && "mr-3")} />
+              {!isCollapsed && <span className="truncate">{item.label}</span>}
             </Button>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-2 border-t border-sidebar-border space-y-2">
-        <div className={cn("flex", isCollapsed ? "justify-center" : "justify-between items-center")}>
-          {!isCollapsed && <div className="flex-1" />}
-          <ThemeToggle />
-        </div>
+      <div className="p-2 border-t border-sidebar-border mt-auto space-y-2 shrink-0">
         <Button
           variant="ghost"
           className={cn(
@@ -107,11 +90,13 @@ export const Sidebar = ({
             isCollapsed ? "justify-center px-2" : "justify-start"
           )}
           onClick={onLogout}
+          title={isCollapsed ? "Logout" : undefined}
         >
-          <LogOut className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+          <LogOut className={cn("h-4 w-4 shrink-0", !isCollapsed && "mr-3")} />
           {!isCollapsed && <span>Logout</span>}
         </Button>
       </div>
     </div>
   );
 };
+

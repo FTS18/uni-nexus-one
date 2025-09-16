@@ -1,242 +1,223 @@
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Clock, MapPin, User, Calendar as CalendarIcon } from "lucide-react";
+import { Clock, MapPin, Users, ArrowLeft, BookOpen, Utensils } from "lucide-react";
+import { allTimetables, courses } from "@/data/timetable-data";
+import { Button } from "@/components/ui/button";
 
-const timeSlots = [
-  "09:00 - 09:50",
-  "10:00 - 10:50", 
-  "11:00 - 11:50",
-  "12:00 - 12:50",
-  "01:00 - 01:50", // Lunch break
-  "02:00 - 02:50",
-  "03:00 - 03:50",
-  "04:00 - 04:50"
-];
-
-const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-
-const timetableData = {
-  "Monday": {
-    "09:00 - 09:50": { subject: "Data Structures", room: "CS-101", faculty: "Dr. Sharma", type: "theory" },
-    "10:00 - 10:50": { subject: "Computer Networks", room: "CS-201", faculty: "Prof. Gupta", type: "theory" },
-    "11:00 - 11:50": { subject: "Database Systems", room: "CS-301", faculty: "Dr. Singh", type: "theory" },
-    "12:00 - 12:50": { subject: "Software Engineering", room: "CS-102", faculty: "Prof. Kumar", type: "theory" },
-    "01:00 - 01:50": { subject: "Lunch Break", room: "", faculty: "", type: "break" },
-    "02:00 - 02:50": { subject: "DS Lab", room: "CS-Lab1", faculty: "Dr. Sharma", type: "lab" },
-    "03:00 - 03:50": { subject: "DS Lab", room: "CS-Lab1", faculty: "Dr. Sharma", type: "lab" },
-    "04:00 - 04:50": { subject: "Free Period", room: "", faculty: "", type: "free" }
-  },
-  "Tuesday": {
-    "09:00 - 09:50": { subject: "Computer Networks", room: "CS-201", faculty: "Prof. Gupta", type: "theory" },
-    "10:00 - 10:50": { subject: "Operating Systems", room: "CS-202", faculty: "Dr. Patel", type: "theory" },
-    "11:00 - 11:50": { subject: "Database Systems", room: "CS-301", faculty: "Dr. Singh", type: "theory" },
-    "12:00 - 12:50": { subject: "Mathematics", room: "MA-101", faculty: "Prof. Verma", type: "theory" },
-    "01:00 - 01:50": { subject: "Lunch Break", room: "", faculty: "", type: "break" },
-    "02:00 - 02:50": { subject: "CN Lab", room: "CS-Lab2", faculty: "Prof. Gupta", type: "lab" },
-    "03:00 - 03:50": { subject: "CN Lab", room: "CS-Lab2", faculty: "Prof. Gupta", type: "lab" },
-    "04:00 - 04:50": { subject: "Library", room: "Library", faculty: "", type: "free" }
-  },
-  "Wednesday": {
-    "09:00 - 09:50": { subject: "Software Engineering", room: "CS-102", faculty: "Prof. Kumar", type: "theory" },
-    "10:00 - 10:50": { subject: "Data Structures", room: "CS-101", faculty: "Dr. Sharma", type: "theory" },
-    "11:00 - 11:50": { subject: "Operating Systems", room: "CS-202", faculty: "Dr. Patel", type: "theory" },
-    "12:00 - 12:50": { subject: "Mathematics", room: "MA-101", faculty: "Prof. Verma", type: "theory" },
-    "01:00 - 01:50": { subject: "Lunch Break", room: "", faculty: "", type: "break" },
-    "02:00 - 02:50": { subject: "DBMS Lab", room: "CS-Lab3", faculty: "Dr. Singh", type: "lab" },
-    "03:00 - 03:50": { subject: "DBMS Lab", room: "CS-Lab3", faculty: "Dr. Singh", type: "lab" },
-    "04:00 - 04:50": { subject: "Free Period", room: "", faculty: "", type: "free" }
-  },
-  "Thursday": {
-    "09:00 - 09:50": { subject: "Database Systems", room: "CS-301", faculty: "Dr. Singh", type: "theory" },
-    "10:00 - 10:50": { subject: "Software Engineering", room: "CS-102", faculty: "Prof. Kumar", type: "theory" },
-    "11:00 - 11:50": { subject: "Computer Networks", room: "CS-201", faculty: "Prof. Gupta", type: "theory" },
-    "12:00 - 12:50": { subject: "Operating Systems", room: "CS-202", faculty: "Dr. Patel", type: "theory" },
-    "01:00 - 01:50": { subject: "Lunch Break", room: "", faculty: "", type: "break" },
-    "02:00 - 02:50": { subject: "Project Work", room: "CS-104", faculty: "Prof. Kumar", type: "project" },
-    "03:00 - 03:50": { subject: "Project Work", room: "CS-104", faculty: "Prof. Kumar", type: "project" },
-    "04:00 - 04:50": { subject: "Seminar", room: "Seminar Hall", faculty: "Various", type: "seminar" }
-  },
-  "Friday": {
-    "09:00 - 09:50": { subject: "Mathematics", room: "MA-101", faculty: "Prof. Verma", type: "theory" },
-    "10:00 - 10:50": { subject: "Data Structures", room: "CS-101", faculty: "Dr. Sharma", type: "theory" },
-    "11:00 - 11:50": { subject: "Software Engineering", room: "CS-102", faculty: "Prof. Kumar", type: "theory" },
-    "12:00 - 12:50": { subject: "Operating Systems", room: "CS-202", faculty: "Dr. Patel", type: "theory" },
-    "01:00 - 01:50": { subject: "Lunch Break", room: "", faculty: "", type: "break" },
-    "02:00 - 02:50": { subject: "Free Period", room: "", faculty: "", type: "free" },
-    "03:00 - 03:50": { subject: "Extra Curricular", room: "Various", faculty: "", type: "activity" },
-    "04:00 - 04:50": { subject: "Free Period", room: "", faculty: "", type: "free" }
-  }
-};
-
-const getClassTypeColor = (type: string) => {
-  switch (type) {
-    case "theory": return "bg-primary/10 text-primary border-primary/20";
-    case "lab": return "bg-accent/10 text-accent-foreground border-accent/20";
-    case "project": return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800";
-    case "seminar": return "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800";
-    case "activity": return "bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800";
-    case "break": return "bg-accent text-accent-foreground border-accent";
-    case "free": return "bg-muted text-muted-foreground border-muted";
-    default: return "bg-secondary text-secondary-foreground border-secondary";
-  }
-};
+interface ClassSchedule {
+  startTime: string;
+  endTime: string;
+  courseCode: string;
+  classType: string;
+  group?: string;
+  location?: string | null;
+}
 
 export const TimetablePage = () => {
-  const currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-  const currentTime = new Date().toLocaleTimeString('en-US', { 
-    hour12: false, 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
+  const [selectedTimetable, setSelectedTimetable] = useState<any>(null);
 
-  const isCurrentTimeSlot = (timeSlot: string) => {
-    const [startTime] = timeSlot.split(' - ');
-    const slotTime = startTime.replace(':', '');
-    const currentTimeFormatted = currentTime.replace(':', '');
-    return parseInt(currentTimeFormatted) >= parseInt(slotTime) && 
-           parseInt(currentTimeFormatted) < parseInt(slotTime) + 50;
+  const timeSlots = useMemo(() => {
+    const allSlots = new Set<string>();
+    // Define a standard 8 AM to 5 PM range
+    for (let i = 8; i < 17; i++) {
+        allSlots.add(`${String(i).padStart(2, '0')}:00`);
+    }
+    return Array.from(allSlots).sort();
+  }, []);
+
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
+  const getCourseColor = (courseCode: string) => {
+    // Subject-wise color clubbing
+    const physicsCourses = ["PY2301", "PY2302","ES2304","ES2305"];
+    const compRelatedCourses = ["ES2301", "ES2302", "ES2303" , "ES2306", "ES2307", "GS2301"];
+    const chemCourses = ["CH2301", "CH2302"];
+    const mathCourses = ["MA2301"];
+    
+    if (physicsCourses.includes(courseCode)) {
+      return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-800";
+    }
+    if (compRelatedCourses.includes(courseCode)) {
+      return "bg-violet-100 text-violet-800 border-violet-200 dark:bg-violet-900/50 dark:text-violet-300 dark:border-violet-800";
+    }
+    if (chemCourses.includes(courseCode)) {
+      return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/50 dark:text-red-300 dark:border-red-800";
+    }
+    if (mathCourses.includes(courseCode)) {
+      return "bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/50 dark:text-sky-300 dark:border-sky-800";
+    }
+    // Dark yellow for others
+    return "bg-yellow-200 text-yellow-900 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-800";
   };
+
+  const findClassForSlot = (day: string, startTime: string): ClassSchedule[] => {
+    const scheduleDay = selectedTimetable?.schedule?.[day] as ClassSchedule[] | undefined;
+    if (!scheduleDay) return [];
+    
+    const currentHour = parseInt(startTime.split(':')[0]);
+
+    return scheduleDay.filter(classInfo => {
+        const startHour = parseInt(classInfo.startTime.split(':')[0]);
+        const endHour = parseInt(classInfo.endTime.split(':')[0]);
+        return currentHour >= startHour && currentHour < endHour;
+    });
+  };
+
+  const getRowSpan = (classInfo: ClassSchedule) => {
+    const start = parseInt(classInfo.startTime.split(':')[0], 10);
+    const end = parseInt(classInfo.endTime.split(':')[0], 10);
+    return end - start;
+  };
+
+  if (!selectedTimetable) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2 text-center">
+          <h1 className="font-heading text-3xl font-bold">Select Your Branch</h1>
+          <p className="font-body text-muted-foreground">
+            Please choose your branch to view the 1st semester timetable.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {allTimetables.map((timetable) => (
+            <Card
+              key={timetable.branchCode}
+              className="border-portal-border hover:border-accent hover:bg-accent/10 transition-all cursor-pointer"
+              onClick={() => setSelectedTimetable(timetable)}
+            >
+              <CardHeader>
+                <CardTitle className="font-heading text-lg">{timetable.branch}</CardTitle>
+                <CardDescription className="font-body text-xs">{timetable.branchCode}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  
+  const { branch, session, semester, notes } = selectedTimetable;
+  
+  const renderedSlots: { [key: string]: Set<string> } = {};
+  days.forEach(day => renderedSlots[day] = new Set());
+
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="font-heading text-3xl font-bold">Class Timetable</h1>
-        <p className="font-body text-muted-foreground">
-          Your weekly class schedule - Computer Science Engineering, 3rd Year
-        </p>
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" onClick={() => setSelectedTimetable(null)}>
+            <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="space-y-2">
+            <h1 className="font-heading text-3xl font-bold">{branch} - Timetable</h1>
+            <p className="font-body text-muted-foreground">
+                Session {session} - Semester {semester}
+            </p>
+        </div>
       </div>
 
-      {/* Current Day Highlight */}
-      <Card className="border-accent bg-accent/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="font-heading flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5" />
-            Today - {currentDay}
-          </CardTitle>
-          <CardDescription className="font-body">
-            Current time: {new Date().toLocaleTimeString('en-US', { 
-              hour12: true, 
-              hour: 'numeric', 
-              minute: '2-digit' 
-            })}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
-      {/* Timetable */}
       <Card className="border-portal-border">
-        <CardHeader>
-          <CardTitle className="font-heading">Weekly Schedule</CardTitle>
-          <CardDescription className="font-body">
-            Click on any class for more details
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse min-w-[1200px] table-fixed">
               <thead>
                 <tr>
-                  <th className="border border-portal-border p-3 bg-portal-surface font-heading text-left min-w-32">
+                  <th className="border border-portal-border p-2 bg-portal-surface font-heading text-left w-28">
                     Time
                   </th>
                   {days.map(day => (
-                    <th 
-                      key={day} 
-                      className={`border border-portal-border p-3 font-heading text-left min-w-48 ${
-                        day === currentDay ? 'bg-accent/20' : 'bg-portal-surface'
-                      }`}
-                    >
+                    <th key={day} className="border border-portal-border p-2 font-heading text-center">
                       {day}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {timeSlots.map(timeSlot => (
-                  <tr key={timeSlot}>
-                    <td className={`border border-portal-border p-3 font-body font-medium ${
-                      isCurrentTimeSlot(timeSlot) && days.includes(currentDay) ? 'bg-accent/10' : 'bg-portal-surface'
-                    }`}>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {timeSlot}
-                      </div>
-                    </td>
-                    {days.map(day => {
-                      const classData = timetableData[day]?.[timeSlot];
-                      const isCurrentSlot = day === currentDay && isCurrentTimeSlot(timeSlot);
-                      
-                      return (
-                        <td 
-                          key={`${day}-${timeSlot}`} 
-                          className={`border border-portal-border p-3 ${
-                            isCurrentSlot ? 'bg-accent/10' : ''
-                          }`}
-                        >
-                          {classData ? (
-                            <div className="space-y-2">
-                              <div className={`p-3 rounded-lg border ${getClassTypeColor(classData.type)}`}>
-                                <h4 className="font-body font-semibold text-sm">
-                                  {classData.subject}
-                                </h4>
-                                {classData.room && (
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <MapPin className="h-3 w-3" />
-                                    <span className="font-body text-xs">{classData.room}</span>
-                                  </div>
-                                )}
-                                {classData.faculty && (
-                                  <div className="flex items-center gap-1">
-                                    <User className="h-3 w-3" />
-                                    <span className="font-body text-xs">{classData.faculty}</span>
-                                  </div>
-                                )}
-                              </div>
-                              {isCurrentSlot && classData.type !== 'break' && classData.type !== 'free' && (
-                                <Badge className="bg-accent text-accent-foreground font-body text-xs">
-                                  Current Class
-                                </Badge>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="text-center text-muted-foreground font-body text-sm">
-                              No class
-                            </div>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
+                {timeSlots.map((timeSlot) => {
+                    if (timeSlot === "12:00") {
+                        return (
+                            <tr key="lunch">
+                                <td className="border border-portal-border p-2 font-body font-medium text-center">12:00 - 13:00</td>
+                                <td colSpan={5} className="border border-portal-border p-2 font-body font-semibold text-center bg-yellow-400/80 text-yellow-900">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Utensils className="h-4 w-4"/>
+                                        <span>Lunch Break</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        );
+                    }
+                   return (
+                    <tr key={timeSlot}>
+                      <td className="border border-portal-border p-2 font-body font-medium text-center">
+                        {`${timeSlot} - ${String(parseInt(timeSlot.split(':')[0], 10) + 1).padStart(2, '0')}:00`}
+                      </td>
+                      {days.map(day => {
+                        const classesInSlot = findClassForSlot(day, timeSlot);
+                        
+                        if(classesInSlot.length > 0 && renderedSlots[day].has(classesInSlot[0].startTime)) {
+                            return null;
+                        }
+                        
+                        if (classesInSlot.length === 0) {
+                            return <td key={`${day}-${timeSlot}`} className="border border-portal-border p-1"></td>;
+                        }
+
+                        const firstClass = classesInSlot[0];
+                        renderedSlots[day].add(firstClass.startTime);
+                        const rowSpan = getRowSpan(firstClass);
+
+                        return (
+                            <td 
+                                key={`${day}-${timeSlot}`} 
+                                className="border border-portal-border p-1 align-top"
+                                rowSpan={rowSpan > 0 ? rowSpan : 1}
+                            >
+                                <div className="flex flex-col gap-1 h-full">
+                                {classesInSlot.map((classData, index) => {
+                                    const courseInfo = courses[classData.courseCode as keyof typeof courses];
+                                    return (
+                                        <div key={index} className={`p-2 rounded-lg border h-full flex flex-col justify-between text-xs ${getCourseColor(classData.courseCode)}`}>
+                                            <div>
+                                                <h4 className="font-body font-semibold">
+                                                    {courseInfo?.courseName || classData.courseCode}
+                                                </h4>
+                                                <p className="opacity-80">{classData.courseCode}</p>
+                                            </div>
+                                            <div className="mt-1 space-y-0.5">
+                                                {classData.location && <div className="flex items-center gap-1"><MapPin className="h-3 w-3" /><span>{classData.location}</span></div>}
+                                                {classData.group && <div className="flex items-center gap-1"><Users className="h-3 w-3" /><span>{classData.group}</span></div>}
+                                                <div className="flex items-center gap-1 font-semibold"><BookOpen className="h-3 w-3" /><span>{classData.classType}</span></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                </div>
+                            </td>
+                        );
+                      })}
+                    </tr>
+                   )
+                })}
               </tbody>
             </table>
           </div>
         </CardContent>
       </Card>
-
-      {/* Legend */}
+      
       <Card className="border-portal-border">
-        <CardHeader>
-          <CardTitle className="font-heading text-lg">Legend</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className={`p-2 rounded-lg border ${getClassTypeColor('theory')} text-center`}>
-              <span className="font-body text-sm font-medium">Theory Class</span>
-            </div>
-            <div className={`p-2 rounded-lg border ${getClassTypeColor('lab')} text-center`}>
-              <span className="font-body text-sm font-medium">Laboratory</span>
-            </div>
-            <div className={`p-2 rounded-lg border ${getClassTypeColor('project')} text-center`}>
-              <span className="font-body text-sm font-medium">Project Work</span>
-            </div>
-            <div className={`p-2 rounded-lg border ${getClassTypeColor('break')} text-center`}>
-              <span className="font-body text-sm font-medium">Break Time</span>
-            </div>
-          </div>
-        </CardContent>
+          <CardHeader>
+              <CardTitle className="font-heading text-lg">Notes</CardTitle>
+          </CardHeader>
+          <CardContent>
+              <ul className="list-disc pl-5 space-y-1 font-body text-sm text-muted-foreground">
+                  {notes.map((note: string, index: number) => (
+                      <li key={index}>{note}</li>
+                  ))}
+              </ul>
+          </CardContent>
       </Card>
     </div>
   );
 };
+
